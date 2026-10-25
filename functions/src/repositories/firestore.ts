@@ -8,7 +8,9 @@ export const refs = {
   outing: (groupId: string, outingId: string) => db.doc(`groups/${groupId}/outings/${outingId}`),
   participants: (groupId: string, outingId: string) => db.collection(`groups/${groupId}/outings/${outingId}/participants`),
   payment: (groupId: string, outingId: string) => db.doc(`groups/${groupId}/payments/${outingId}`),
-  summary: (groupId: string, weekId: string) => db.doc(`groups/${groupId}/weeklySummaries/${weekId}`)
+  summary: (groupId: string, weekId: string) => db.doc(`groups/${groupId}/weeklySummaries/${weekId}`),
+  adminAnalytics: (groupId: string, weekId: string) => db.doc(`groups/${groupId}/adminAnalytics/${weekId}`),
+  appliedAdminOuting: (groupId: string, weekId: string, outingId: string) => db.doc(`groups/${groupId}/adminAnalytics/${weekId}/appliedOutings/${outingId}`)
 };
 
 export function now() { return Timestamp.now(); }
@@ -33,4 +35,3 @@ export function recalculateSummary(current: DocumentData | undefined, participan
   }
   return { memberStats, totalCents, averageCents, activeParticipantCount: active.length };
 }
-

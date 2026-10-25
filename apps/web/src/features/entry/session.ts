@@ -4,6 +4,7 @@ export interface SessionUser {
   email: string | null;
   photoURL: string | null;
   mode: 'test' | 'firebase';
+  access: 'member' | 'admin';
   /** Compatibility flag for domain adapters that still distinguish local state. */
   demo: boolean;
 }

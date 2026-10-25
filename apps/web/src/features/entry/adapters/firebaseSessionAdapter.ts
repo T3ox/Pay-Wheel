@@ -2,13 +2,14 @@ import type { User } from 'firebase/auth';
 import { callFunction, newRequestId } from '../../../services/firebase/callable';
 import type { SessionAdapter, SessionUser } from '../session';
 
-function mapUser(user: User): SessionUser {
+function mapUser(user: User, access: 'member' | 'admin'): SessionUser {
   return {
     uid: user.uid,
     displayName: user.displayName ?? 'Collega',
     email: user.email,
     photoURL: user.photoURL,
     mode: 'firebase',
+    access,
     demo: false
   };
 }
@@ -20,9 +21,12 @@ async function getConfiguredAuth() {
 }
 
 async function bootstrapAndJoin(user: User) {
-  await callFunction('bootstrapInternalSession', { requestId: newRequestId() });
+  const bootstrap = await callFunction<
+    { requestId: string },
+    { membership: { access: 'member' | 'admin' } }
+  >('bootstrapInternalSession', { requestId: newRequestId() });
   await callFunction('joinCurrentOuting', { requestId: newRequestId(), participating: true });
-  return mapUser(user);
+  return mapUser(user, bootstrap.membership.access);
 }
 
 export const firebaseSessionAdapter: SessionAdapter = {

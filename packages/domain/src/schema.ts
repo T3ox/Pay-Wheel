@@ -38,6 +38,7 @@ export const internalWorkspaceSchema = z.object({
   timezone: z.literal('Europe/Rome'),
   status: z.enum(['active', 'maintenance']),
   openOutingId: z.string().nullable(),
+  stateRevision: z.number().int().nonnegative(),
   completedOutingSequence: z.number().int().nonnegative(),
   algorithmVersion: z.literal('fairness-v1'),
   maxPaymentCents: z.number().int().positive().max(50_000)
@@ -58,6 +59,7 @@ export const groupSchema = z.object({
 
 export const outingSchema = z.object({
   status: outingStatusSchema,
+  revision: z.number().int().positive(),
   createdBy: z.string().min(1),
   payerUserId: z.string().nullable(),
   payerDisplayNameSnapshot: z.string().nullable(),

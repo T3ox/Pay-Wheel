@@ -7,6 +7,7 @@ import { DrawResult } from './DrawResult';
 import { OutingDetailsSheet } from './OutingDetailsSheet';
 import { Wheel } from './Wheel';
 import { createSpinMotion, SPIN_DURATION_MS, SPIN_TURNS } from './wheelMotion';
+import { canMutateSharedWheel } from './outingState';
 
 export type PrimaryAction = 'join' | 'leave' | 'spin';
 
@@ -17,7 +18,7 @@ export function getPrimaryAction({ hasOuting, joined, ready }: { hasOuting: bool
 
 export function OutingPage() {
   const { user } = useSession();
-  const { group, outing, busy, joinCurrentOuting, toggleParticipation, refreshPreview, spin } = usePayWheel();
+  const { group, outing, busy, synced, joinCurrentOuting, toggleParticipation, refreshPreview, spin } = usePayWheel();
   const online = useNetworkStatus();
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
@@ -28,14 +29,14 @@ export function OutingPage() {
   const revealTimerRef = useRef<number | null>(null);
   const joined = outing?.participants.some((entry) => entry.userId === user?.uid) ?? false;
   const entries = outing?.preview?.entries ?? [];
-  const canMutate = Boolean(user?.demo || online) && group?.status !== 'maintenance';
+  const canMutate = canMutateSharedWheel({ demo: Boolean(user?.demo), online, synced, maintenance: group?.status === 'maintenance' });
   const ready = canMutate && joined && (outing?.participants.length ?? 0) >= 2 && Boolean(outing?.preview) && outing?.status === 'open';
   const primaryAction = getPrimaryAction({ hasOuting: Boolean(outing), joined, ready });
 
   useEffect(() => {
-    if (outing?.status === 'open' && outing.participants.length > 0 && !outing.preview) void refreshPreview().catch(() => undefined);
+    if ((user?.demo || synced) && outing?.status === 'open' && outing.participants.length > 0 && !outing.preview) void refreshPreview().catch(() => undefined);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [outing?.participants.length, outing?.status, outing?.preview]);
+  }, [outing?.participants.length, outing?.status, outing?.preview, synced]);
 
   useEffect(() => () => {
     if (revealTimerRef.current !== null) window.clearTimeout(revealTimerRef.current);
@@ -103,6 +104,7 @@ export function OutingPage() {
       <Button disabled={!canMutate || spinning} loading={busy || spinning} onClick={() => void handlePrimaryAction()}>{actionLabel}</Button>
       {error && <p className="stage-error" role="alert">{error}</p>}
       {!online && !user?.demo && <p className="stage-status">Offline</p>}
+      {online && !synced && !user?.demo && <p className="stage-status">Sincronizzazione…</p>}
     </div>
     <OutingDetailsSheet open={detailsOpen} onClose={() => setDetailsOpen(false)} />
   </main>;

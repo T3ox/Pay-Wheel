@@ -4,6 +4,7 @@ import { requestIdSchema } from '@pay-wheel/domain';
 import { z } from 'zod';
 import { db, hasInternalAdminClaim, internalWorkspaceId, requireInternalIdentity } from '../platform/firebase.js';
 import { refs } from '../repositories/firestore.js';
+import { readRevision } from '../domain/shared-wheel.js';
 
 const options = { region: 'europe-west1', enforceAppCheck: process.env.FUNCTIONS_EMULATOR !== 'true' } as const;
 
@@ -29,6 +30,7 @@ export const bootstrapInternalSession = onCall(options, async (request) => {
     const photoUrl = request.auth?.token.picture ?? null;
     const email = String(request.auth?.token.email ?? '').toLowerCase();
     const access = hasInternalAdminClaim(request, membershipSnapshot.data()) ? 'admin' : 'member';
+    const stateRevision = readRevision(groupSnapshot.data()?.stateRevision);
 
     if (!groupSnapshot.exists) {
       transaction.set(groupRef, {
@@ -40,6 +42,7 @@ export const bootstrapInternalSession = onCall(options, async (request) => {
         status: 'active',
         archivedAt: null,
         openOutingId: null,
+        stateRevision,
         completedOutingSequence: 0,
         activeMemberCount: 0,
         algorithmVersion: 'fairness-v1',
@@ -47,6 +50,8 @@ export const bootstrapInternalSession = onCall(options, async (request) => {
         createdAt: now,
         updatedAt: now
       });
+    } else if (!Number.isInteger(groupSnapshot.data()?.stateRevision)) {
+      transaction.set(groupRef, { stateRevision }, { merge: true });
     }
 
     transaction.set(membershipRef, {
@@ -84,7 +89,8 @@ export const bootstrapInternalSession = onCall(options, async (request) => {
       user: { userId: uid, displayName, photoUrl },
       workspace: { status: 'active', timezone: 'Europe/Rome', currency: 'EUR' },
       membership: { status: 'active', access },
-      currentOutingId: groupSnapshot.data()?.openOutingId ?? null
+      currentOutingId: groupSnapshot.data()?.openOutingId ?? null,
+      stateRevision
     };
   });
 });

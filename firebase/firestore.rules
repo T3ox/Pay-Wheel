@@ -32,6 +32,10 @@ service cloud.firestore {
         match /corrections/{correctionId} { allow read: if internalMember(groupId); allow write: if false; }
       }
       match /weeklySummaries/{weekId} { allow read: if internalMember(groupId); allow write: if false; }
+      match /adminAnalytics/{weekId} {
+        allow read, write: if false;
+        match /appliedOutings/{outingId} { allow read, write: if false; }
+      }
       match /invites/{inviteId} { allow read, write: if false; }
       match /idempotencyKeys/{requestId} { allow read, write: if false; }
     }

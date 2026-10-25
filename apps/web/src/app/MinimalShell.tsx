@@ -5,7 +5,7 @@ import { InstallPrompt } from '../features/pwa/InstallPrompt';
 import { UpdatePrompt } from '../features/pwa/UpdatePrompt';
 import { useNetworkStatus } from '../services/network/useNetworkStatus';
 
-const links = [
+const memberLinks = [
   { to: '/', label: 'Ruota' },
   { to: '/leaderboard', label: 'Classifica' },
   { to: '/history', label: 'Storico' },
@@ -14,9 +14,10 @@ const links = [
 
 export function MinimalShell() {
   const [open, setOpen] = useState(false);
-  const { signOut } = useSession();
+  const { user, signOut } = useSession();
   const online = useNetworkStatus();
   const location = useLocation();
+  const links = user?.access === 'admin' ? [...memberLinks, { to: '/admin/dashboard', label: 'Dashboard admin' }] : memberLinks;
 
   return <div className="minimal-shell">
     <a className="skip-link" href="#main-content">Vai al contenuto</a>

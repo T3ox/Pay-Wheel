@@ -25,7 +25,8 @@
 .wheel { width: 100%; display: block; transform: rotate(var(--wheel-rotation)); }
 .wheel--spinning { transition: transform var(--wheel-duration) cubic-bezier(.08, .72, .12, 1); will-change: transform; }
 .wheel-pointer { position: absolute; z-index: 2; top: -2px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 12px solid transparent; border-right: 12px solid transparent; border-top: 28px solid var(--color-text); }
-.wheel-label { fill: #111318; font-size: 11px; font-weight: 800; paint-order: stroke; stroke: rgba(255, 255, 255, .28); stroke-width: 1px; }
+.wheel-label { font-size: 11px; font-weight: 800; paint-order: stroke; stroke: rgba(255, 255, 255, .25); stroke-width: 1px; }
+.wheel-segment-protection { pointer-events: none; vector-effect: non-scaling-stroke; }
 .primary-action-slot { min-height: 82px; display: grid; place-items: center; align-content: start; gap: 8px; }
 .stage-error, .stage-status { max-width: 320px; margin: 0; color: #ff9ba4; text-align: center; font-size: .82rem; }
 .stage-status { color: var(--color-muted); }
@@ -65,6 +66,7 @@
 .participant-list li:last-child, .leaderboard-list li:last-child, .history-list li:last-child { border-bottom: 0; }
 .participant-main, .leaderboard-list li > div, .history-list li > div { min-width: 0; flex: 1; display: grid; }
 .participant-main span, .leaderboard-list span, .history-list span { color: var(--color-muted); font-size: .78rem; }
+.participant-color { width: 10px; height: 38px; flex: 0 0 auto; border: 1px solid rgba(255, 255, 255, .45); border-radius: 999px; }
 .muted { color: var(--color-muted); }
 .avatar { flex: 0 0 auto; display: inline-grid; place-items: center; border-radius: 50%; object-fit: cover; color: var(--color-text); background: var(--color-surface-raised); font-weight: 800; }
 .avatar--sm { width: 38px; height: 38px; font-size: .7rem; }
@@ -93,6 +95,19 @@ input, select { width: 100%; min-height: 50px; padding: 0 14px; border: 1px soli
 .banner--success { border-color: #287c4b; color: #aaf0c1; }
 .banner--warning { border-color: #7a6721; color: #ffe995; }
 
+.admin-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; margin: 24px 0 30px; background: var(--color-line); border: 1px solid var(--color-line); border-radius: 16px; overflow: hidden; }
+.admin-summary > div { min-width: 0; padding: 18px; display: grid; gap: 6px; background: var(--color-bg); }
+.admin-summary span { color: var(--color-muted); font-size: .78rem; }
+.admin-summary strong { font-size: clamp(1.25rem, 4vw, 2rem); overflow-wrap: anywhere; }
+.admin-table-wrap { width: 100%; overflow: hidden; }
+.admin-table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+.admin-table th, .admin-table td { padding: 15px 10px; border-bottom: 1px solid var(--color-line); text-align: right; vertical-align: middle; }
+.admin-table th:first-child, .admin-table td:first-child { padding-left: 0; text-align: left; }
+.admin-table th:last-child, .admin-table td:last-child { padding-right: 0; }
+.admin-table thead th { color: var(--color-muted); font-size: .72rem; }
+.admin-table thead button { min-height: 44px; padding: 0; border: 0; color: inherit; background: transparent; font: inherit; font-weight: 750; cursor: pointer; }
+.admin-table tbody th { font-weight: 750; }
+
 .install-card, .update-card { position: fixed; z-index: 35; right: 16px; bottom: 16px; width: min(420px, calc(100% - 32px)); padding: 14px; border: 1px solid var(--color-line); border-radius: 16px; background: var(--color-surface); display: flex; align-items: center; gap: 10px; }
 .install-card > div { flex: 1; display: grid; }
 .update-card > span { flex: 1; }
@@ -103,6 +118,12 @@ input, select { width: 100%; min-height: 50px; padding: 0 14px; border: 1px soli
   .dialog__actions .button { width: 100%; }
   .setting-row { align-items: flex-start; flex-direction: column; padding: 14px 0; }
   .install-card, .update-card { bottom: max(12px, env(safe-area-inset-bottom)); }
+  .admin-summary { grid-template-columns: 1fr; }
+  .admin-table thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  .admin-table, .admin-table tbody, .admin-table tr, .admin-table th, .admin-table td { display: block; width: 100%; }
+  .admin-table tr { padding: 14px 0; border-bottom: 1px solid var(--color-line); }
+  .admin-table th, .admin-table td, .admin-table th:first-child, .admin-table td:first-child { min-height: 38px; padding: 7px 0; border: 0; display: flex; align-items: baseline; justify-content: space-between; gap: 18px; text-align: right; }
+  .admin-table th::before, .admin-table td::before { content: attr(data-label); color: var(--color-muted); font-size: .75rem; font-weight: 600; text-align: left; }
 }
 
 @media (orientation: landscape) and (max-height: 560px) {

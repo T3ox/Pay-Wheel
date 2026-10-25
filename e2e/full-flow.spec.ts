@@ -17,6 +17,8 @@ test('local flow covers join, draw, automatic payment and secondary views', asyn
     (segment as SVGPathElement).dataset.userId,
     segment.getAttribute('fill')
   ])));
+  expect(Object.values(segmentColors).every((fill) => typeof fill === 'string' && /^#[0-9a-f]{6}$/i.test(fill))).toBe(true);
+  await expect(page.locator('.wheel-segment-protection')).toHaveCount(1);
   await spin.click();
   const wheel = page.getByRole('img', { name: /ruota in rotazione/i });
   await expect(page.getByRole('main', { name: 'Ruota Pay Wheel' })).toHaveAttribute('aria-busy', 'true');
@@ -41,4 +43,10 @@ test('local flow covers join, draw, automatic payment and secondary views', asyn
   await page.getByRole('link', { name: 'Profilo' }).click();
   await expect(page.getByRole('heading', { name: /ciao/i })).toBeVisible();
   await expect(page.getByText(/pagamento automatico/i)).toBeVisible();
+
+  await page.getByRole('button', { name: 'Apri menu' }).click();
+  await page.getByRole('link', { name: 'Dashboard admin' }).click();
+  await expect(page.getByRole('heading', { name: 'Dashboard admin' })).toBeVisible();
+  await expect(page.getByLabel('Riepilogo del periodo')).toContainText('7,20');
+  await expect(page.getByRole('table', { name: /spese e percentuali/i })).toBeVisible();
 });

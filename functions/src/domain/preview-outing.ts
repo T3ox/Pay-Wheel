@@ -2,6 +2,7 @@ import { buildFairnessPreview, createPreviewVersion, getWeekId, type FairnessInp
 import type { Transaction } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
 import { refs } from '../repositories/firestore.js';
+import { readRevision } from './shared-wheel.js';
 
 export async function calculateOutingPreview(groupId: string, outingId: string, transaction?: Transaction) {
   const get = <T extends FirebaseFirestore.DocumentData>(ref: FirebaseFirestore.DocumentReference<T>) => transaction ? transaction.get(ref) : ref.get();
@@ -32,5 +33,11 @@ export async function calculateOutingPreview(groupId: string, outingId: string, 
   if (inputs.length < 1) throw new HttpsError('failed-precondition', 'Nessun partecipante.', { code: 'NOT_ENOUGH_PARTICIPANTS' });
   const preview = buildFairnessPreview(inputs, weekId, summary?.averageCents ?? 0);
   const previewVersion = await createPreviewVersion(preview);
-  return { ...preview, previewVersion, participantCount: inputs.length };
+  return {
+    ...preview,
+    previewVersion,
+    participantCount: inputs.length,
+    revision: readRevision(outing.revision, 1),
+    stateRevision: readRevision(group.stateRevision)
+  };
 }

@@ -5,7 +5,8 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(({ mode }) => {
   const buildEnv = loadEnv(mode, process.cwd(), '');
   const firebaseReady = Boolean(buildEnv.VITE_FIREBASE_API_KEY && buildEnv.VITE_FIREBASE_AUTH_DOMAIN && buildEnv.VITE_FIREBASE_PROJECT_ID && buildEnv.VITE_FIREBASE_APP_ID);
-  if (mode === 'production' && buildEnv.CI === 'true' && (buildEnv.VITE_TEST_MODE === 'true' || !firebaseReady)) {
+  const sharedDeployment = buildEnv.CI === 'true' || buildEnv.VERCEL === '1';
+  if (mode === 'production' && sharedDeployment && (buildEnv.VITE_TEST_MODE === 'true' || !firebaseReady)) {
     throw new Error('Production CI requires Firebase configuration and VITE_TEST_MODE disabled.');
   }
 

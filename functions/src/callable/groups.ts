@@ -18,7 +18,7 @@ export const createGroup = onCall(options, async (request) => {
     const userRef = refs.user(uid); const user = await transaction.get(userRef);
     if (user.data()?.activeGroupId) throw new HttpsError('failed-precondition', 'Hai già un gruppo attivo.', { code: 'CONFLICT' });
     const now = Timestamp.now();
-    transaction.set(groupRef, { name: input.name, currency: 'EUR', timezone: input.timezone, ownerUserId: uid, status: 'active', archivedAt: null, openOutingId: null, completedOutingSequence: 0, activeMemberCount: 1, algorithmVersion: 'fairness-v1', maxPaymentCents: 50000, createdAt: now, updatedAt: now });
+    transaction.set(groupRef, { name: input.name, currency: 'EUR', timezone: input.timezone, ownerUserId: uid, status: 'active', archivedAt: null, openOutingId: null, stateRevision: 0, completedOutingSequence: 0, activeMemberCount: 1, algorithmVersion: 'fairness-v1', maxPaymentCents: 50000, createdAt: now, updatedAt: now });
     transaction.set(refs.membership(groupRef.id, uid), { userId: uid, displayNameSnapshot: request.auth?.token.name ?? 'Collega', photoUrlSnapshot: request.auth?.token.picture ?? null, role: 'owner', status: 'active', joinedAt: now, leftAt: null, lastPaidWeekId: null, lastPaidAt: null });
     transaction.set(userRef, { displayName: request.auth?.token.name ?? 'Collega', email: request.auth?.token.email ?? '', photoUrl: request.auth?.token.picture ?? null, activeGroupId: groupRef.id, locale: 'it-IT', reduceMotionOverride: 'system', status: 'active', createdAt: user.exists ? user.data()?.createdAt : now, updatedAt: now }, { merge: true });
     saveIdempotentResult(transaction, groupRef.id, input.requestId, 'createGroup', uid, groupRef.id, input, result);
