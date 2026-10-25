@@ -1,0 +1,20 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "outings",
+      "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }]
+    },
+    {
+      "collectionGroup": "payments",
+      "queryScope": "COLLECTION",
+      "fields": [{ "fieldPath": "weekId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }]
+    },
+    {
+      "collectionGroup": "outings",
+      "queryScope": "COLLECTION_GROUP",
+      "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "drawnAt", "order": "ASCENDING" }]
+    }
+  ],
+  "fieldOverrides": []
+}

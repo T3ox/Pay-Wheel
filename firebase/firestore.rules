@@ -1,0 +1,43 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function userWorkspace() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.workspaceId;
+    }
+    function internalMember(groupId) {
+      return signedIn()
+        && userWorkspace() == groupId
+        && get(/databases/$(database)/documents/groups/$(groupId)/memberships/$(request.auth.uid)).data.status == 'active';
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn() && request.auth.uid == userId;
+      allow update: if signedIn() && request.auth.uid == userId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['locale', 'reduceMotionOverride', 'updatedAt']);
+      allow create, delete: if false;
+    }
+
+    match /groups/{groupId} {
+      allow read: if internalMember(groupId);
+      allow write: if false;
+
+      match /memberships/{userId} { allow read: if internalMember(groupId); allow write: if false; }
+      match /outings/{outingId} {
+        allow read: if internalMember(groupId); allow write: if false;
+        match /participants/{userId} { allow read: if internalMember(groupId); allow write: if false; }
+      }
+      match /payments/{paymentId} {
+        allow read: if internalMember(groupId); allow write: if false;
+        match /corrections/{correctionId} { allow read: if internalMember(groupId); allow write: if false; }
+      }
+      match /weeklySummaries/{weekId} { allow read: if internalMember(groupId); allow write: if false; }
+      match /invites/{inviteId} { allow read, write: if false; }
+      match /idempotencyKeys/{requestId} { allow read, write: if false; }
+    }
+
+    match /inviteCodes/{codeHash} { allow read, write: if false; }
+    match /accountDeletionRequests/{requestId} { allow read, write: if false; }
+    match /{document=**} { allow read, write: if false; }
+  }
+}
