@@ -43,7 +43,10 @@ export function SessionProvider({ children }: { children: ReactNode }) {
         if (!active) return;
         setError(cause.message);
         setLoading(false);
-      })).then((stop) => { unsubscribe = stop; }).catch((cause: Error) => {
+      })).then((stop) => {
+        if (active) unsubscribe = stop;
+        else stop();
+      }).catch((cause: Error) => {
         if (active) {
           setError(cause.message);
           setLoading(false);

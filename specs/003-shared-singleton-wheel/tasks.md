@@ -110,6 +110,12 @@
 - [X] T023 [P] Aggiornare configurazione e procedura di pubblicazione condivisa in README.md e apps/web/.env.example
 - [ ] T024 Eseguire lint, typecheck, test, build e test Rules secondo specs/003-shared-singleton-wheel/quickstart.md — lint, typecheck, test, build ed E2E superati; test Rules bloccati dall'assenza di Java locale
 - [X] T025 Verificare che tutti i requisiti implementati siano tracciati e marcare completati i task in specs/003-shared-singleton-wheel/tasks.md
+- [X] T026 [P] Aggiungere test di deduplicazione, cache, retry e cambio utente del bootstrap sessione in apps/web/src/features/entry/adapters/sessionBootstrap.test.ts
+- [X] T027 Deduplicare bootstrap e join avviati da popup e listener Firebase in apps/web/src/features/entry/adapters/firebaseSessionAdapter.ts
+- [X] T028 Chiudere il listener Firebase creato dopo lo smontaggio del provider in apps/web/src/features/entry/SessionProvider.tsx
+- [X] T029 [P] Coprire riconoscimento host locale e mapping della sessione Google locale in apps/web/src/features/entry/adapters/localGoogleSession.test.ts
+- [X] T030 Evitare le callable protette da App Check dopo login Google su localhost in apps/web/src/features/entry/adapters/firebaseSessionAdapter.ts
+- [X] T031 Documentare la sessione Google locale indipendente dalle callable di produzione in README.md
 
 ---
 

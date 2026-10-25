@@ -25,6 +25,8 @@ Senza credenziali Firebase l'app entra automaticamente in modalità test: all'ap
 VITE_TEST_MODE=true
 ```
 
+Su `localhost`, con Firebase Auth configurato e gli emulatori disattivati, **Entra** autentica realmente l'account Google ma mantiene workspace, ruota e pagamenti nel browser. In questo modo lo sviluppo locale non dipende dalle callable di produzione protette da App Check. Attivando gli emulatori, anche il bootstrap torna a usare Functions e Firestore locali.
+
 Per usare Auth, Firestore e Functions impostare `VITE_TEST_MODE=false`, compilare le variabili Firebase, configurare `INTERNAL_GROUP_ID` e `INTERNAL_ALLOWED_DOMAINS` lato Functions e avviare gli emulatori o distribuire il progetto.
 
 ## Ruota singleton condivisa

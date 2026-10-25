@@ -1,6 +1,9 @@
 import type { User } from 'firebase/auth';
+import { useEmulators } from '../../../config/env';
 import { callFunction, newRequestId } from '../../../services/firebase/callable';
 import type { SessionAdapter, SessionUser } from '../session';
+import { createLocalGoogleSession, shouldUseLocalGoogleSession } from './localGoogleSession';
+import { createSessionBootstrap } from './sessionBootstrap';
 
 function mapUser(user: User, access: 'member' | 'admin'): SessionUser {
   return {
@@ -21,6 +24,7 @@ async function getConfiguredAuth() {
 }
 
 async function bootstrapAndJoin(user: User) {
+  if (shouldUseLocalGoogleSession(location.hostname, useEmulators)) return createLocalGoogleSession(user);
   const bootstrap = await callFunction<
     { requestId: string },
     { membership: { access: 'member' | 'admin' } }
@@ -29,10 +33,12 @@ async function bootstrapAndJoin(user: User) {
   return mapUser(user, bootstrap.membership.access);
 }
 
+const sessionBootstrap = createSessionBootstrap<User, SessionUser>(bootstrapAndJoin);
+
 export const firebaseSessionAdapter: SessionAdapter = {
   async restore() {
     const { auth } = await getConfiguredAuth();
-    return auth.currentUser ? bootstrapAndJoin(auth.currentUser) : null;
+    return auth.currentUser ? sessionBootstrap.resolve(auth.currentUser) : null;
   },
   async enter() {
     const { auth, authApi } = await getConfiguredAuth();
@@ -43,11 +49,12 @@ export const firebaseSessionAdapter: SessionAdapter = {
       throw new Error('Accesso in corso…');
     }
     const result = await authApi.signInWithPopup(auth, provider);
-    return bootstrapAndJoin(result.user);
+    return sessionBootstrap.resolve(result.user);
   },
   async signOut() {
     const { auth, authApi } = await getConfiguredAuth();
     await authApi.signOut(auth);
+    sessionBootstrap.clear();
   },
   async reauthenticate() {
     const { auth, authApi } = await getConfiguredAuth();
@@ -60,9 +67,10 @@ export async function observeFirebaseSession(onChange: (user: SessionUser | null
   await authApi.getRedirectResult(auth).catch((error: Error) => onError(error));
   return authApi.onAuthStateChanged(auth, (user) => {
     if (!user) {
+      sessionBootstrap.clear();
       onChange(null);
       return;
     }
-    void bootstrapAndJoin(user).then(onChange).catch((error: Error) => onError(error));
+    void sessionBootstrap.resolve(user).then(onChange).catch((error: Error) => onError(error));
   });
 }
